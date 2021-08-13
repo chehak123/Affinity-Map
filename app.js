@@ -10,7 +10,6 @@ const bcrypt = require("bcryptjs");
 // const http = require('http');
 const ejs = require("ejs");
 var Sentiment = require("sentiment");
-require("./db/conn");
 require("dotenv").config();
 
 const { resolveSoa } = require("dns");
@@ -23,41 +22,6 @@ const formatMessage = require("./utils/messages");
 
 // Intialize the app
 const app = express();
-
-//passport authentication
-var User = require("./db/models/users");
-var Match = require("./db/models/match");
-var MatchUser = require("./db/models/match");
-var passport = require("passport");
-var localStrategy = require("passport-local"),
-  methodOverride = require("method-override");
-app.use(
-  require("express-session")({
-    secret: "This is the decryption key",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-
-// Database connect
-mongoose.connect("mongodb+srv://chehak:123@cluster0.ohkb1.mongodb.net/UserDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-app.use(methodOverride("_method"));
-app.use(passport.initialize()); //use to use passport in our code
-app.use(passport.session());
-
-passport.use(new localStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-// Socket.io imports
-const http = require("http");
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
 
 // Create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
@@ -79,13 +43,10 @@ app.use(function (req, res, next) {
   next();
 });
 
-var authRoutes = require("./routes/auth.js");
-var counter = 0;
-app.use("/", authRoutes);
 
 // Homepage rendering
 // Journal page rendering
-app.get("/journal", (req, res) => {
+app.get("/", (req, res) => {
   res.render("journal");
 });
 
@@ -93,6 +54,6 @@ app.get("/journal", (req, res) => {
 // Ports
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Lazy bum on Port ${PORT}`);
 });
